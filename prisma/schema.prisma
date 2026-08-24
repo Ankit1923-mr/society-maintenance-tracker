@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  RESIDENT
+  ADMIN
+}
+
+enum Category {
+  PLUMBING
+  ELECTRICAL
+  CLEANLINESS
+  SECURITY
+  PARKING
+  LIFT
+  OTHER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum Status {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+model User {
+  id         String   @id @default(cuid())
+  name       String
+  email      String   @unique
+  password   String
+  role       Role     @default(RESIDENT)
+  flatNumber String?
+  createdAt  DateTime @default(now())
+
+  complaints Complaint[]
+  histories  ComplaintHistory[] @relation("ActorHistories")
+  notices    Notice[]           @relation("NoticeAuthor")
+}
+
+model Complaint {
+  id          String    @id @default(cuid())
+  resident    User      @relation(fields: [residentId], references: [id])
+  residentId  String
+  category    Category
+  description String
+  photoUrl    String?
+  priority    Priority  @default(MEDIUM)
+  status      Status    @default(OPEN)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  resolvedAt  DateTime?
+
+  history ComplaintHistory[]
+
+  @@index([status])
+  @@index([category])
+  @@index([createdAt])
+}
+
+model ComplaintHistory {
+  id             String   @id @default(cuid())
+  complaint      Complaint @relation(fields: [complaintId], references: [id])
+  complaintId    String
+  actor          User     @relation("ActorHistories", fields: [actorId], references: [id])
+  actorId        String
+  previousStatus Status?
+  newStatus      Status
+  note           String?
+  timestamp      DateTime @default(now())
+}
+
+model Notice {
+  id          String   @id @default(cuid())
+  title       String
+  body        String
+  isImportant Boolean  @default(false)
+  createdBy   User     @relation("NoticeAuthor", fields: [authorId], references: [id])
+  authorId    String
+  createdAt   DateTime @default(now())
+
+  @@index([isImportant, createdAt])
+}
