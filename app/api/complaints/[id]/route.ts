@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, isErrorResponse } from "@/lib/middleware";
+import { sendComplaintStatusUpdateEmail } from "@/lib/email";
 
 // GET /api/complaints/[id] - Get single complaint with history
 export async function GET(
@@ -125,6 +126,15 @@ export async function PATCH(
       },
     },
   });
+
+  if (status && status !== complaint.status) {
+    await sendComplaintStatusUpdateEmail(
+      updated.resident.email,
+      updated.id,
+      status,
+      note
+    );
+  }
 
   return NextResponse.json({ complaint: updated });
 }
