@@ -21,26 +21,27 @@ export default async function RootLayout({
   const user = await getCurrentUser();
 
   return (
-    <html lang="en" className="bg-slate-50">
+    <html lang="en" className="bg-[#0a0a0f] text-slate-200 antialiased">
       <body className={inter.className}>
-        <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white shadow-sm">
+        <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#0a0a0f]/50 backdrop-blur-md">
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-8">
-              <Link href="/" className="text-xl font-bold tracking-tight text-slate-900">
+              <Link href="/" className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                <div className="w-6 h-6 rounded-md bg-gradient-to-tr from-indigo-500 to-purple-500"></div>
                 SocietyApp
               </Link>
               {user && (
                 <nav className="hidden md:flex gap-6">
                   {user.role === "ADMIN" ? (
                     <>
-                      <Link href="/admin/dashboard" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Dashboard</Link>
-                      <Link href="/admin/complaints" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Complaints</Link>
-                      <Link href="/admin/notices" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Notices</Link>
+                      <Link href="/admin/dashboard" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Dashboard</Link>
+                      <Link href="/admin/complaints" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Complaints</Link>
+                      <Link href="/admin/notices" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Notices</Link>
                     </>
                   ) : (
                     <>
-                      <Link href="/complaints" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">My Complaints</Link>
-                      <Link href="/notices" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Notice Board</Link>
+                      <Link href="/complaints" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">My Complaints</Link>
+                      <Link href="/notices" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Notice Board</Link>
                     </>
                   )}
                 </nav>
@@ -50,15 +51,15 @@ export default async function RootLayout({
             <div className="flex items-center gap-4">
               {user ? (
                 <>
-                  <span className="text-sm text-slate-500 hidden sm:inline-block">
-                    {user.name} ({user.role})
+                  <span className="text-sm text-slate-400 hidden sm:inline-block">
+                    {user.name} <span className="px-2 py-0.5 ml-1 rounded text-xs bg-white/10 text-slate-300">{user.role}</span>
                   </span>
                   <LogoutButton />
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900">Sign in</Link>
-                  <Link href="/register" className="text-sm font-medium rounded-md bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-700 transition-colors">Register</Link>
+                  <Link href="/login" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Sign in</Link>
+                  <Link href="/register" className="text-sm font-medium rounded-md bg-white text-black px-4 py-2 hover:bg-slate-200 transition-colors">Get Started</Link>
                 </>
               )}
             </div>
