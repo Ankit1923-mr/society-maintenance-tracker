@@ -27,11 +27,17 @@ export default function AdminComplaintsPage() {
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
+  const [fromDate, setFromDate] = useState<string>("");
+  const [toDate, setToDate] = useState<string>("");
 
   const fetchData = async () => {
     try {
+      const queryParams = new URLSearchParams({ limit: "100" });
+      if (fromDate) queryParams.append("from", fromDate);
+      if (toDate) queryParams.append("to", toDate);
+
       const [complaintsRes, overdueRes] = await Promise.all([
-        fetch("/api/complaints?limit=100"), // simplify with large limit for now
+        fetch(`/api/complaints?${queryParams.toString()}`), // simplify with large limit for now
         fetch("/api/complaints/overdue")
       ]);
       const complaintsData = await complaintsRes.json();
@@ -48,7 +54,7 @@ export default function AdminComplaintsPage() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fromDate, toDate]);
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     try {
@@ -124,8 +130,8 @@ export default function AdminComplaintsPage() {
         <p className="mt-1 text-sm text-slate-400">View and update resident issues</p>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 bg-white/5 p-5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-md">
-        <div className="flex-1">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-4 bg-white/5 p-5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-md">
+        <div className="flex-1 min-w-[150px]">
           <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Status</label>
           <select 
             value={statusFilter}
@@ -138,7 +144,7 @@ export default function AdminComplaintsPage() {
             <option value="RESOLVED">Resolved</option>
           </select>
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-[150px]">
           <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Category</label>
           <select 
             value={categoryFilter}
@@ -154,6 +160,24 @@ export default function AdminComplaintsPage() {
             <option value="LIFT">Lift</option>
             <option value="OTHER">Other</option>
           </select>
+        </div>
+        <div className="flex-1 min-w-[150px]">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">From Date</label>
+          <input 
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            className="w-full rounded-lg border-white/10 bg-[#0a0a0f] text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5 px-3 transition-colors [color-scheme:dark]"
+          />
+        </div>
+        <div className="flex-1 min-w-[150px]">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">To Date</label>
+          <input 
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            className="w-full rounded-lg border-white/10 bg-[#0a0a0f] text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5 px-3 transition-colors [color-scheme:dark]"
+          />
         </div>
       </div>
 

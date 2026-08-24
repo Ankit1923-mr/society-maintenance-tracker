@@ -13,6 +13,8 @@ export async function GET(request: Request) {
   const category = searchParams.get("category");
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "20");
+  const from = searchParams.get("from");
+  const to = searchParams.get("to");
 
   const where: Record<string, unknown> = {};
 
@@ -23,6 +25,17 @@ export async function GET(request: Request) {
 
   if (status) where.status = status;
   if (category) where.category = category;
+
+  if (from || to) {
+    where.createdAt = {};
+    if (from) (where.createdAt as Record<string, unknown>).gte = new Date(from);
+    if (to) {
+      const toDate = new Date(to);
+      // Set to end of day to include all complaints on that day
+      toDate.setUTCHours(23, 59, 59, 999);
+      (where.createdAt as Record<string, unknown>).lte = toDate;
+    }
+  }
 
   const [complaints, total] = await Promise.all([
     prisma.complaint.findMany({
