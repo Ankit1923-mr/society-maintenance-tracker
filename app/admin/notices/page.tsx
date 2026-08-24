@@ -107,46 +107,46 @@ export default function AdminNoticesPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Manage Notices</h1>
-        <p className="mt-1 text-sm text-slate-500">Post announcements to the society notice board</p>
+        <h1 className="text-3xl font-bold tracking-tight text-white">Manage Notices</h1>
+        <p className="mt-1 text-sm text-slate-400">Post announcements to the society notice board</p>
       </div>
 
       {/* Create / Edit Form */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-slate-900">
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8 shadow-2xl backdrop-blur-md">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold text-white">
             {editId ? "Edit Notice" : "Post New Notice"}
           </h2>
           {editId && (
-            <button onClick={resetForm} className="text-sm text-slate-500 hover:text-slate-700">
+            <button onClick={resetForm} className="text-sm text-slate-400 hover:text-white transition-colors">
               Cancel Edit
             </button>
           )}
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-slate-700">Title</label>
+            <label htmlFor="title" className="block text-sm font-medium text-slate-300">Title</label>
             <input
               id="title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-lg border border-white/10 bg-[#0a0a0f] px-4 py-3 text-white placeholder-slate-500 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm transition-colors"
               placeholder="e.g. Scheduled Power Outage"
             />
           </div>
           <div>
-            <label htmlFor="body" className="block text-sm font-medium text-slate-700">Message</label>
+            <label htmlFor="body" className="block text-sm font-medium text-slate-300">Message</label>
             <textarea
               id="body"
-              rows={3}
+              rows={4}
               value={body}
               onChange={(e) => setBody(e.target.value)}
               required
-              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-lg border border-white/10 bg-[#0a0a0f] px-4 py-3 text-white placeholder-slate-500 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm transition-colors"
               placeholder="Provide details..."
             />
           </div>
@@ -156,18 +156,18 @@ export default function AdminNoticesPage() {
               type="checkbox"
               checked={isImportant}
               onChange={(e) => setIsImportant(e.target.checked)}
-              className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
+              className="h-4 w-4 rounded border-white/10 bg-[#0a0a0f] text-indigo-500 focus:ring-indigo-500 focus:ring-offset-[#0a0a0f]"
             />
-            <label htmlFor="isImportant" className="ml-2 block text-sm font-medium text-slate-900">
+            <label htmlFor="isImportant" className="ml-2 block text-sm font-medium text-slate-300">
               Pin to top (Mark as Important)
             </label>
           </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <div className="pt-2">
+          {error && <p className="text-sm text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20">{error}</p>}
+          <div className="pt-4 flex items-center gap-4">
             <button
               type="submit"
               disabled={formLoading}
-              className="inline-flex justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
+              className="inline-flex justify-center rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-black shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#0a0a0f] disabled:opacity-50 transition-all duration-200"
             >
               {formLoading ? (editId ? "Updating..." : "Posting...") : (editId ? "Update Notice" : "Post Notice")}
             </button>
@@ -176,7 +176,7 @@ export default function AdminNoticesPage() {
                 type="button"
                 onClick={resetForm}
                 disabled={formLoading}
-                className="ml-3 inline-flex justify-center rounded-md bg-white border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
+                className="inline-flex justify-center rounded-lg bg-white/5 border border-white/10 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#0a0a0f] disabled:opacity-50 transition-colors"
               >
                 Cancel
               </button>
@@ -187,37 +187,37 @@ export default function AdminNoticesPage() {
 
       {/* Notices List */}
       <div>
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">Past Notices</h2>
+        <h2 className="text-2xl font-semibold text-white mb-6">Past Notices</h2>
         {loading ? (
-          <div className="text-sm text-slate-500">Loading notices...</div>
+          <div className="text-sm text-slate-400">Loading notices...</div>
         ) : notices.length === 0 ? (
-          <div className="text-sm text-slate-500 border border-slate-200 rounded-md p-4 bg-slate-50">No notices posted yet.</div>
+          <div className="text-sm text-slate-400 border border-white/10 rounded-xl p-6 bg-white/5 backdrop-blur-md">No notices posted yet.</div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {notices.map((notice) => (
-              <div key={notice.id} className={`rounded-xl border p-5 shadow-sm flex flex-col sm:flex-row gap-4 sm:items-start justify-between ${notice.isImportant ? 'border-amber-200 bg-amber-50' : 'border-slate-200 bg-white'}`}>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-slate-900">{notice.title}</h3>
+              <div key={notice.id} className={`rounded-2xl border p-6 sm:p-8 backdrop-blur-md flex flex-col sm:flex-row gap-6 sm:items-start justify-between transition-all ${notice.isImportant ? 'border-amber-500/30 bg-amber-500/10 shadow-[0_0_20px_rgba(245,158,11,0.05)]' : 'border-white/10 bg-white/5 shadow-lg'}`}>
+                <div className="flex-grow">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-lg font-semibold text-white">{notice.title}</h3>
                     {notice.isImportant && (
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">Pinned</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300 bg-amber-500/20 px-2.5 py-0.5 rounded-full border border-amber-500/20">Pinned</span>
                     )}
                   </div>
-                  <p className="text-sm text-slate-600 whitespace-pre-wrap">{notice.body}</p>
-                  <p className="text-xs text-slate-400 mt-2">
+                  <p className="text-sm text-slate-300 whitespace-pre-wrap leading-relaxed">{notice.body}</p>
+                  <p className="text-xs text-slate-500 mt-4">
                     Posted by {notice.createdBy.name} on {new Date(notice.createdAt).toLocaleDateString()}
                   </p>
                 </div>
-                <div className="flex sm:flex-col gap-2 shrink-0">
+                <div className="flex sm:flex-col gap-3 shrink-0 pt-1">
                   <button
                     onClick={() => handleEdit(notice)}
-                    className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors text-right"
+                    className="text-sm font-medium text-slate-300 hover:text-white transition-colors text-right bg-white/5 border border-white/10 px-4 py-1.5 rounded-lg hover:bg-white/10"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(notice.id)}
-                    className="text-sm font-medium text-red-600 hover:text-red-800 transition-colors text-right"
+                    className="text-sm font-medium text-red-400 hover:text-red-300 transition-colors text-right bg-red-500/10 border border-red-500/20 px-4 py-1.5 rounded-lg hover:bg-red-500/20"
                   >
                     Delete
                   </button>

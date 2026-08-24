@@ -118,19 +118,19 @@ export default function AdminComplaintsPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Manage Complaints</h1>
-        <p className="mt-1 text-sm text-slate-500">View and update resident issues</p>
+        <h1 className="text-3xl font-bold tracking-tight text-white">Manage Complaints</h1>
+        <p className="mt-1 text-sm text-slate-400">View and update resident issues</p>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row gap-4 bg-white/5 p-5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-md">
         <div className="flex-1">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Status</label>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Status</label>
           <select 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="w-full rounded-lg border-white/10 bg-[#0a0a0f] text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5 transition-colors"
           >
             <option value="ALL">All Statuses</option>
             <option value="OPEN">Open</option>
@@ -139,11 +139,11 @@ export default function AdminComplaintsPage() {
           </select>
         </div>
         <div className="flex-1">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Category</label>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Category</label>
           <select 
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="w-full rounded-lg border-white/10 bg-[#0a0a0f] text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5 transition-colors"
           >
             <option value="ALL">All Categories</option>
             <option value="PLUMBING">Plumbing</option>
@@ -157,52 +157,52 @@ export default function AdminComplaintsPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50">
+          <table className="min-w-full divide-y divide-white/10">
+            <thead className="bg-white/5">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Complaint</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Resident</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Priority</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Complaint</th>
+                <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Resident</th>
+                <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Status</th>
+                <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Priority</th>
+                <th scope="col" className="px-6 py-4 text-right text-xs font-semibold text-slate-300 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 bg-white">
+            <tbody className="divide-y divide-white/10 bg-transparent">
               {filtered.map((complaint) => {
                 const isOverdue = overdueIds.has(complaint.id);
                 const overdueDetails = overdue.find(o => o.id === complaint.id);
 
                 return (
-                  <tr key={complaint.id} className={isOverdue ? "bg-red-50/50" : ""}>
+                  <tr key={complaint.id} className={`${isOverdue ? "bg-red-500/10" : "hover:bg-white/5"} transition-colors`}>
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="font-medium text-slate-900">{complaint.category}</span>
-                        <span className="text-sm text-slate-500 truncate max-w-[200px]">{complaint.description}</span>
+                        <span className="font-semibold text-white">{complaint.category}</span>
+                        <span className="text-sm text-slate-400 truncate max-w-[200px] mt-1">{complaint.description}</span>
                         {isOverdue && (
-                          <span className="mt-1 text-xs font-semibold text-red-600 flex items-center">
-                            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                          <span className="mt-2 text-xs font-semibold text-red-400 flex items-center bg-red-500/10 w-fit px-2 py-1 rounded-md border border-red-500/20">
+                            <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             Overdue by {overdueDetails?.hoursOverdue}h
                           </span>
                         )}
-                        <span className="text-xs text-slate-400 mt-1">
+                        <span className="text-xs text-slate-500 mt-2">
                           {new Date(complaint.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-slate-900">{complaint.resident.name}</div>
-                      <div className="text-sm text-slate-500">{complaint.resident.flatNumber || "No flat"}</div>
+                      <div className="text-sm font-medium text-white">{complaint.resident.name}</div>
+                      <div className="text-sm text-slate-400 mt-1">{complaint.resident.flatNumber || "No flat"}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <select
                         value={complaint.status}
                         onChange={(e) => handleStatusChange(complaint.id, e.target.value)}
-                        className={`text-sm rounded-full border-0 py-1 pl-3 pr-8 font-semibold ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 ${
-                          complaint.status === "OPEN" ? "bg-amber-50 text-amber-700 ring-amber-200 focus:ring-amber-500" :
-                          complaint.status === "IN_PROGRESS" ? "bg-blue-50 text-blue-700 ring-blue-200 focus:ring-blue-500" :
-                          "bg-green-50 text-green-700 ring-green-200 focus:ring-green-500"
+                        className={`text-xs rounded-full border border-white/10 py-1.5 pl-3 pr-8 font-semibold ring-0 focus:ring-2 focus:ring-inset sm:text-xs sm:leading-6 transition-colors ${
+                          complaint.status === "OPEN" ? "bg-amber-500/10 text-amber-400 focus:ring-amber-500" :
+                          complaint.status === "IN_PROGRESS" ? "bg-blue-500/10 text-blue-400 focus:ring-blue-500" :
+                          "bg-emerald-500/10 text-emerald-400 focus:ring-emerald-500"
                         }`}
                       >
                         <option value="OPEN">OPEN</option>
@@ -214,10 +214,10 @@ export default function AdminComplaintsPage() {
                       <select
                         value={complaint.priority}
                         onChange={(e) => handlePriorityChange(complaint.id, e.target.value)}
-                        className={`text-sm rounded-md border-0 py-1.5 pl-3 pr-8 font-medium ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 ${
-                          complaint.priority === "HIGH" ? "text-red-700 ring-red-200 focus:ring-red-500" :
-                          complaint.priority === "MEDIUM" ? "text-amber-700 ring-amber-200 focus:ring-amber-500" :
-                          "text-green-700 ring-green-200 focus:ring-green-500"
+                        className={`text-xs rounded-lg border border-white/10 py-1.5 pl-3 pr-8 font-semibold ring-0 focus:ring-2 focus:ring-inset sm:text-xs sm:leading-6 transition-colors ${
+                          complaint.priority === "HIGH" ? "bg-[#0a0a0f] text-red-400 focus:ring-red-500" :
+                          complaint.priority === "MEDIUM" ? "bg-[#0a0a0f] text-amber-400 focus:ring-amber-500" :
+                          "bg-[#0a0a0f] text-emerald-400 focus:ring-emerald-500"
                         }`}
                       >
                         <option value="LOW">LOW</option>
@@ -227,15 +227,15 @@ export default function AdminComplaintsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex flex-col gap-2 items-end">
-                        <Link href={`/complaints/${complaint.id}`} className="text-indigo-600 hover:text-indigo-900">
+                        <Link href={`/complaints/${complaint.id}`} className="text-slate-300 hover:text-white transition-colors bg-white/5 border border-white/10 px-3 py-1 rounded-md text-xs">
                           View
                         </Link>
-                        <Link href={`/complaints/${complaint.id}/edit`} className="text-indigo-600 hover:text-indigo-900">
+                        <Link href={`/complaints/${complaint.id}/edit`} className="text-slate-300 hover:text-white transition-colors bg-white/5 border border-white/10 px-3 py-1 rounded-md text-xs">
                           Edit
                         </Link>
                         <button 
                           onClick={() => handleDelete(complaint.id)}
-                          className="text-red-600 hover:text-red-900"
+                          className="text-red-400 hover:text-red-300 transition-colors bg-red-500/10 border border-red-500/20 px-3 py-1 rounded-md text-xs"
                         >
                           Delete
                         </button>
@@ -246,7 +246,7 @@ export default function AdminComplaintsPage() {
               })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-sm text-slate-500">
+                  <td colSpan={5} className="px-6 py-16 text-center text-sm text-slate-400">
                     No complaints found matching the filters.
                   </td>
                 </tr>
