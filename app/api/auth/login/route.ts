@@ -15,8 +15,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Fixed dummy hash to prevent timing attacks
+    const DUMMY_HASH = "$2a$10$wO32N2O9g8XvL/D0xQ5e6O/6f2.U1D3v.X4x.O0N1V3y1n3X0c7Cq";
+
     const user = await prisma.user.findUnique({ where: { email } });
+    
     if (!user) {
+      // Run dummy compare to equalize time taken
+      await bcrypt.compare(password, DUMMY_HASH);
       return NextResponse.json(
         { error: "Invalid email or password" },
         { status: 401 }

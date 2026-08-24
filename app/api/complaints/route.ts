@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, isErrorResponse } from "@/lib/middleware";
+import { sendComplaintCreatedEmail } from "@/lib/email";
 
 // GET /api/complaints - List complaints (residents see own, admins see all)
 export async function GET(request: Request) {
@@ -94,6 +95,14 @@ export async function POST(request: Request) {
         note: "Complaint created",
       },
     });
+
+    // Send confirmation email asynchronously
+    void sendComplaintCreatedEmail(
+      complaint.resident.email,
+      complaint.id,
+      complaint.category,
+      complaint.description
+    );
 
     return NextResponse.json({ complaint }, { status: 201 });
   } catch (error) {
