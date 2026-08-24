@@ -1,7 +1,39 @@
-import { Resend } from "resend";
+const brevoApiKey = process.env.BREVO_API_KEY;
+const fromEmail = process.env.EMAIL_FROM || "updates@societyapp.com";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+async function sendEmail(to: string, subject: string, htmlContent: string) {
+  if (!brevoApiKey) {
+    console.error("[Email] Missing BREVO_API_KEY environment variable");
+    return;
+  }
+
+  try {
+    console.log(`[Email] Attempting to send email to ${to} via Brevo. Subject: "${subject}"`);
+
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": brevoApiKey,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        sender: { email: fromEmail },
+        to: [{ email: to }],
+        subject,
+        htmlContent,
+      }),
+    });
+
+    const data = await res.json();
+    console.log(`[Email] Brevo API response:`, JSON.stringify(data));
+
+    if (!res.ok) {
+      console.error("[Email] Brevo API returned an error:", data);
+    }
+  } catch (error) {
+    console.error("[Email] Failed to send email (Exception):", error);
+  }
+}
 
 export async function sendComplaintStatusUpdateEmail(
   toEmail: string,
@@ -9,35 +41,20 @@ export async function sendComplaintStatusUpdateEmail(
   newStatus: string,
   note?: string | null
 ) {
-  try {
-    const isResolved = newStatus === "RESOLVED";
-    const statusText = isResolved ? "Resolved and closed" : newStatus.replace("_", " ");
-    const titleText = isResolved 
-      ? "Your complaint has been resolved and closed."
-      : "Your complaint status has been updated.";
+  const isResolved = newStatus === "RESOLVED";
+  const statusText = isResolved ? "Resolved and closed" : newStatus.replace("_", " ");
+  const titleText = isResolved 
+    ? "Your complaint has been resolved and closed."
+    : "Your complaint status has been updated.";
 
-    console.log(`[Email] Attempting to send status update email to ${toEmail} for complaint #${complaintId}`);
+  const html = `
+    <h2>${titleText}</h2>
+    <p><strong>Complaint ID:</strong> ${complaintId}</p>
+    <p><strong>New Status:</strong> ${statusText}</p>
+    ${note ? `<p><strong>Note:</strong> ${note}</p>` : ""}
+  `;
 
-    const response = await resend.emails.send({
-      from: fromEmail,
-      to: toEmail,
-      subject: `Update on your complaint #${complaintId}`,
-      html: `
-        <h2>${titleText}</h2>
-        <p><strong>Complaint ID:</strong> ${complaintId}</p>
-        <p><strong>New Status:</strong> ${statusText}</p>
-        ${note ? `<p><strong>Note:</strong> ${note}</p>` : ""}
-      `,
-    });
-
-    console.log(`[Email] Resend API response:`, JSON.stringify(response));
-
-    if (response.error) {
-      console.error("[Email] Resend returned an error:", response.error);
-    }
-  } catch (error) {
-    console.error("[Email] Failed to send email (Exception):", error);
-  }
+  await sendEmail(toEmail, `Update on your complaint #${complaintId}`, html);
 }
 
 export async function sendComplaintCreatedEmail(
@@ -46,29 +63,14 @@ export async function sendComplaintCreatedEmail(
   category: string,
   description: string
 ) {
-  try {
-    console.log(`[Email] Attempting to send creation email to ${toEmail} for complaint #${complaintId}`);
+  const html = `
+    <h2>We have received your complaint.</h2>
+    <p>Thank you for letting us know. Our team will look into it shortly.</p>
+    <p><strong>Complaint ID:</strong> ${complaintId}</p>
+    <p><strong>Category:</strong> ${category}</p>
+    <p><strong>Description:</strong> ${description}</p>
+    <p>You can track the status on your dashboard.</p>
+  `;
 
-    const response = await resend.emails.send({
-      from: fromEmail,
-      to: toEmail,
-      subject: `Complaint Received #${complaintId}`,
-      html: `
-        <h2>We have received your complaint.</h2>
-        <p>Thank you for letting us know. Our team will look into it shortly.</p>
-        <p><strong>Complaint ID:</strong> ${complaintId}</p>
-        <p><strong>Category:</strong> ${category}</p>
-        <p><strong>Description:</strong> ${description}</p>
-        <p>You can track the status on your dashboard.</p>
-      `,
-    });
-
-    console.log(`[Email] Resend API response:`, JSON.stringify(response));
-
-    if (response.error) {
-      console.error("[Email] Resend returned an error:", response.error);
-    }
-  } catch (error) {
-    console.error("[Email] Failed to send creation email (Exception):", error);
-  }
+  await sendEmail(toEmail, `Complaint Received #${complaintId}`, html);
 }

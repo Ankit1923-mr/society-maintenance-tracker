@@ -23,6 +23,7 @@ export default function AdminNoticesPage() {
   const [isImportant, setIsImportant] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [error, setError] = useState("");
+  const [editId, setEditId] = useState<string | null>(null);
 
   const fetchNotices = async () => {
     try {
@@ -48,20 +49,22 @@ export default function AdminNoticesPage() {
     setError("");
 
     try {
-      const res = await fetch("/api/notices", {
-        method: "POST",
+      const url = editId ? `/api/notices/${editId}` : "/api/notices";
+      const method = editId ? "PATCH" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, body, isImportant }),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Failed to create notice");
+        throw new Error(data.error || `Failed to ${editId ? 'update' : 'create'} notice`);
       }
 
-      setTitle("");
-      setBody("");
-      setIsImportant(false);
+      resetForm();
+      fetchNotices();
       fetchNotices();
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -72,6 +75,23 @@ export default function AdminNoticesPage() {
     } finally {
       setFormLoading(false);
     }
+  };
+
+  const resetForm = () => {
+    setTitle("");
+    setBody("");
+    setIsImportant(false);
+    setEditId(null);
+    setError("");
+  };
+
+  const handleEdit = (notice: Notice) => {
+    setTitle(notice.title);
+    setBody(notice.body);
+    setIsImportant(notice.isImportant);
+    setEditId(notice.id);
+    setError("");
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = async (id: string) => {
@@ -93,9 +113,18 @@ export default function AdminNoticesPage() {
         <p className="mt-1 text-sm text-slate-500">Post announcements to the society notice board</p>
       </div>
 
-      {/* Create Form */}
+      {/* Create / Edit Form */}
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">Post New Notice</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-slate-900">
+            {editId ? "Edit Notice" : "Post New Notice"}
+          </h2>
+          {editId && (
+            <button onClick={resetForm} className="text-sm text-slate-500 hover:text-slate-700">
+              Cancel Edit
+            </button>
+          )}
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-slate-700">Title</label>
@@ -140,8 +169,18 @@ export default function AdminNoticesPage() {
               disabled={formLoading}
               className="inline-flex justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
             >
-              {formLoading ? "Posting..." : "Post Notice"}
+              {formLoading ? (editId ? "Updating..." : "Posting...") : (editId ? "Update Notice" : "Post Notice")}
             </button>
+            {editId && (
+              <button
+                type="button"
+                onClick={resetForm}
+                disabled={formLoading}
+                className="ml-3 inline-flex justify-center rounded-md bg-white border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
+              >
+                Cancel
+              </button>
+            )}
           </div>
         </form>
       </div>
@@ -169,12 +208,20 @@ export default function AdminNoticesPage() {
                     Posted by {notice.createdBy.name} on {new Date(notice.createdAt).toLocaleDateString()}
                   </p>
                 </div>
-                <button
-                  onClick={() => handleDelete(notice.id)}
-                  className="text-sm font-medium text-red-600 hover:text-red-800 transition-colors shrink-0"
-                >
-                  Delete
-                </button>
+                <div className="flex sm:flex-col gap-2 shrink-0">
+                  <button
+                    onClick={() => handleEdit(notice)}
+                    className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors text-right"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(notice.id)}
+                    className="text-sm font-medium text-red-600 hover:text-red-800 transition-colors text-right"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>
