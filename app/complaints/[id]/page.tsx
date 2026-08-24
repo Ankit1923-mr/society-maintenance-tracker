@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { Priority, Status, Category } from "@prisma/client";
 
@@ -30,8 +30,15 @@ interface Complaint {
 
 export default function ComplaintDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const [complaint, setComplaint] = useState<Complaint | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+  
+  // Note form state
+  const [adminNote, setAdminNote] = useState("");
+  const [noteLoading, setNoteLoading] = useState(false);
 
   useEffect(() => {
     async function fetchComplaint() {
@@ -40,6 +47,8 @@ export default function ComplaintDetailPage() {
         const data = await res.json();
         if (data.complaint) {
           setComplaint(data.complaint);
+          setIsAdmin(data.isAdmin);
+          setIsOwner(data.isOwner);
         }
       } catch (error) {
         console.error(error);
@@ -49,6 +58,50 @@ export default function ComplaintDetailPage() {
     }
     fetchComplaint();
   }, [params.id]);
+
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this complaint? This cannot be undone.")) return;
+    try {
+      const res = await fetch(`/api/complaints/${params.id}`, { method: "DELETE" });
+      if (res.ok) {
+        router.push(isAdmin ? "/admin/complaints" : "/complaints");
+        router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to delete complaint");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to delete complaint");
+    }
+  };
+
+  const handleAddNote = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminNote.trim()) return;
+    setNoteLoading(true);
+    
+    try {
+      const res = await fetch(`/api/complaints/${params.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ note: adminNote }),
+      });
+      if (res.ok) {
+        setAdminNote("");
+        const data = await res.json();
+        setComplaint(data.complaint); // Refresh data
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to add note");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to add note");
+    } finally {
+      setNoteLoading(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -80,13 +133,31 @@ export default function ComplaintDetailPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <Link href="/complaints" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <Link href={isAdmin ? "/admin/complaints" : "/complaints"} className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
           &larr; Back to complaints
         </Link>
-        <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${getStatusColor(complaint.status)}`}>
-          {complaint.status.replace("_", " ")}
-        </span>
+        <div className="flex items-center gap-4">
+          <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${getStatusColor(complaint.status)}`}>
+            {complaint.status.replace("_", " ")}
+          </span>
+          {((isOwner && complaint.status === "OPEN") || isAdmin) && (
+            <div className="flex items-center gap-2 border-l pl-4 border-slate-200">
+              <Link 
+                href={`/complaints/${complaint.id}/edit`}
+                className="text-sm font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-3 py-1 rounded-md"
+              >
+                Edit
+              </Link>
+              <button 
+                onClick={handleDelete}
+                className="text-sm font-medium text-red-600 hover:text-red-800 bg-red-50 px-3 py-1 rounded-md"
+              >
+                Delete
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -158,6 +229,29 @@ export default function ComplaintDetailPage() {
                 ))}
               </ul>
             </div>
+            
+            {isAdmin && (
+              <div className="mt-8 pt-6 border-t border-slate-200">
+                <h3 className="text-sm font-semibold text-slate-900 mb-3">Add Note (Admin Only)</h3>
+                <form onSubmit={handleAddNote} className="space-y-3">
+                  <textarea
+                    value={adminNote}
+                    onChange={(e) => setAdminNote(e.target.value)}
+                    placeholder="Write a message to the resident (does not change status)..."
+                    rows={3}
+                    className="block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    disabled={noteLoading}
+                    className="inline-flex justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
+                  >
+                    {noteLoading ? "Posting..." : "Post Note"}
+                  </button>
+                </form>
+              </div>
+            )}
             
           </div>
         </div>

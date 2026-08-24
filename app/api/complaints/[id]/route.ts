@@ -37,7 +37,11 @@ export async function GET(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  return NextResponse.json({ complaint });
+  return NextResponse.json({
+    complaint,
+    isAdmin: auth.role === "ADMIN",
+    isOwner: complaint.residentId === auth.userId,
+  });
 }
 
 // PATCH /api/complaints/[id] - Update complaint (status change by admin, edit by owner)
@@ -57,7 +61,7 @@ export async function PATCH(
   }
 
   const body = await request.json();
-  const { status, note, priority, description } = body;
+  const { status, note, priority, description, category, photoUrl } = body;
 
   // Status changes are admin-only
   if (status && auth.role !== "ADMIN") {
@@ -67,20 +71,27 @@ export async function PATCH(
     );
   }
 
-  // Residents can only edit their own complaints (description only)
-  if (auth.role !== "ADMIN" && complaint.residentId !== auth.userId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  // Residents can only edit their own complaints and only if OPEN
+  if (auth.role !== "ADMIN") {
+    if (complaint.residentId !== auth.userId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    if ((description || category || photoUrl !== undefined) && complaint.status !== "OPEN") {
+      return NextResponse.json({ error: "Cannot edit complaint after work has started" }, { status: 403 });
+    }
   }
 
   const updateData: Record<string, unknown> = {};
 
-  if (description && complaint.residentId === auth.userId) {
-    updateData.description = description;
-  }
+  if (description) updateData.description = description;
+  if (category && auth.role === "ADMIN") updateData.category = category;
+  if (photoUrl !== undefined) updateData.photoUrl = photoUrl;
 
   if (priority && auth.role === "ADMIN") {
     updateData.priority = priority;
   }
+
+  let isNoteOnly = false;
 
   if (status) {
     const validStatuses = ["OPEN", "IN_PROGRESS", "RESOLVED"];
@@ -107,6 +118,18 @@ export async function PATCH(
         note: note || null,
       },
     });
+  } else if (note && auth.role === "ADMIN") {
+    // Admin adding a note without status change
+    isNoteOnly = true;
+    await prisma.complaintHistory.create({
+      data: {
+        complaintId: complaint.id,
+        actorId: auth.userId,
+        previousStatus: complaint.status,
+        newStatus: complaint.status,
+        note,
+      },
+    });
   }
 
   const updated = await prisma.complaint.update({
@@ -127,13 +150,22 @@ export async function PATCH(
     },
   });
 
+  // Handle emails
   if (status && status !== complaint.status) {
-    await sendComplaintStatusUpdateEmail(
+    void sendComplaintStatusUpdateEmail(
       updated.resident.email,
       updated.id,
       status,
       note
     );
+  } else if (isNoteOnly && note) {
+    const { sendComplaintNoteEmail } = await import("@/lib/email");
+    void sendComplaintNoteEmail(updated.resident.email, updated.id, note);
+  }
+  
+  if (priority && priority !== complaint.priority) {
+    const { sendComplaintPriorityUpdateEmail } = await import("@/lib/email");
+    void sendComplaintPriorityUpdateEmail(updated.resident.email, updated.id, priority);
   }
 
   return NextResponse.json({ complaint: updated });
@@ -155,8 +187,13 @@ export async function DELETE(
     return NextResponse.json({ error: "Complaint not found" }, { status: 404 });
   }
 
-  if (auth.role !== "ADMIN" && complaint.residentId !== auth.userId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (auth.role !== "ADMIN") {
+    if (complaint.residentId !== auth.userId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    if (complaint.status !== "OPEN") {
+      return NextResponse.json({ error: "Cannot delete complaint after work has started" }, { status: 403 });
+    }
   }
 
   // Delete history first (foreign key constraint)

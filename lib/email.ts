@@ -74,3 +74,31 @@ export async function sendComplaintCreatedEmail(
 
   await sendEmail(toEmail, `Complaint Received #${complaintId}`, html);
 }
+
+export async function sendComplaintPriorityUpdateEmail(
+  toEmail: string,
+  complaintId: string,
+  newPriority: string
+) {
+  const html = `
+    <h2>Your complaint priority has been updated.</h2>
+    <p><strong>Complaint ID:</strong> ${complaintId}</p>
+    <p><strong>New Priority:</strong> ${newPriority}</p>
+  `;
+
+  await sendEmail(toEmail, `Priority Update on complaint #${complaintId}`, html);
+}
+
+export async function sendComplaintNoteEmail(
+  toEmail: string,
+  complaintId: string,
+  note: string
+) {
+  const html = `
+    <h2>An admin has added a note to your complaint.</h2>
+    <p><strong>Complaint ID:</strong> ${complaintId}</p>
+    <p><strong>Note:</strong> ${note}</p>
+  `;
+
+  await sendEmail(toEmail, `New Note on complaint #${complaintId}`, html);
+}

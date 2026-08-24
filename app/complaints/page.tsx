@@ -108,12 +108,50 @@ export default function ComplaintsPage() {
               <p className="text-sm text-slate-600 line-clamp-2 mb-4 flex-grow">
                 {complaint.description}
               </p>
-              <div className="text-xs text-slate-400 mt-auto">
-                {new Date(complaint.createdAt).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric"
-                })}
+              
+              <div className="mt-auto border-t border-slate-100 pt-3">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400">
+                    {new Date(complaint.createdAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    })}
+                  </span>
+                  
+                  {complaint.status === "OPEN" && (
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          window.location.href = `/complaints/${complaint.id}/edit`;
+                        }}
+                        className="font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          if (!confirm("Are you sure you want to delete this complaint?")) return;
+                          try {
+                            const res = await fetch(`/api/complaints/${complaint.id}`, { method: "DELETE" });
+                            if (res.ok) {
+                              setComplaints(prev => prev.filter(c => c.id !== complaint.id));
+                            } else {
+                              alert("Failed to delete");
+                            }
+                          } catch {
+                            alert("Failed to delete");
+                          }
+                        }}
+                        className="font-medium text-red-600 hover:text-red-800 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </Link>
           ))}

@@ -76,6 +76,21 @@ export default function AdminComplaintsPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this complaint?")) return;
+    try {
+      const res = await fetch(`/api/complaints/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        fetchData();
+      } else {
+        alert("Failed to delete complaint");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to delete complaint");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -211,9 +226,20 @@ export default function AdminComplaintsPage() {
                       </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Link href={`/complaints/${complaint.id}`} className="text-indigo-600 hover:text-indigo-900">
-                        View <span className="sr-only">, {complaint.id}</span>
-                      </Link>
+                      <div className="flex flex-col gap-2 items-end">
+                        <Link href={`/complaints/${complaint.id}`} className="text-indigo-600 hover:text-indigo-900">
+                          View
+                        </Link>
+                        <Link href={`/complaints/${complaint.id}/edit`} className="text-indigo-600 hover:text-indigo-900">
+                          Edit
+                        </Link>
+                        <button 
+                          onClick={() => handleDelete(complaint.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
