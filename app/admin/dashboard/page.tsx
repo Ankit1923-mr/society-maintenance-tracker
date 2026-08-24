@@ -11,6 +11,7 @@ interface Stats {
     resolved: number;
     overdue: number;
   };
+  categories: Record<string, number>;
   users: number;
   notices: number;
 }
@@ -102,6 +103,17 @@ export default function AdminDashboardPage() {
           <p className="text-sm font-medium text-slate-400">Total Users</p>
           <p className="mt-2 text-3xl font-bold tracking-tight text-white">{stats.users}</p>
         </div>
+      </div>
+
+      {/* Category Breakdown */}
+      <h2 className="text-xl font-semibold text-white mt-10 mb-6">Category Breakdown</h2>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {["PLUMBING", "ELECTRICAL", "CLEANLINESS", "SECURITY", "PARKING", "LIFT", "OTHER"].map(cat => (
+          <div key={cat} className="rounded-xl border border-white/10 bg-white/5 p-5 backdrop-blur-md transition-colors hover:border-white/20 flex items-center justify-between">
+            <span className="text-sm font-medium text-slate-300">{cat.charAt(0) + cat.slice(1).toLowerCase()}</span>
+            <span className="text-xl font-bold tracking-tight text-white">{stats.categories[cat] || 0}</span>
+          </div>
+        ))}
       </div>
     </div>
   );

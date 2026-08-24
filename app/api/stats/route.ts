@@ -28,6 +28,17 @@ export async function GET(request: Request) {
       isOverdue(c.createdAt, c.priority, c.status)
     ).length;
 
+    // Get category breakdown
+    const categoryCounts = await prisma.complaint.groupBy({
+      by: ["category"],
+      _count: { id: true },
+    });
+
+    const categories = categoryCounts.reduce((acc, curr) => {
+      acc[curr.category] = curr._count.id;
+      return acc;
+    }, {} as Record<string, number>);
+
     return NextResponse.json({
       stats: {
         complaints: {
@@ -37,6 +48,7 @@ export async function GET(request: Request) {
           resolved: resolvedComplaints,
           overdue: overdueCount,
         },
+        categories,
         users: totalUsers,
         notices: totalNotices,
       },
