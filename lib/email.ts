@@ -16,7 +16,9 @@ export async function sendComplaintStatusUpdateEmail(
       ? "Your complaint has been resolved and closed."
       : "Your complaint status has been updated.";
 
-    await resend.emails.send({
+    console.log(`[Email] Attempting to send status update email to ${toEmail} for complaint #${complaintId}`);
+
+    const response = await resend.emails.send({
       from: fromEmail,
       to: toEmail,
       subject: `Update on your complaint #${complaintId}`,
@@ -27,8 +29,14 @@ export async function sendComplaintStatusUpdateEmail(
         ${note ? `<p><strong>Note:</strong> ${note}</p>` : ""}
       `,
     });
+
+    console.log(`[Email] Resend API response:`, JSON.stringify(response));
+
+    if (response.error) {
+      console.error("[Email] Resend returned an error:", response.error);
+    }
   } catch (error) {
-    console.error("Failed to send email:", error);
+    console.error("[Email] Failed to send email (Exception):", error);
   }
 }
 
@@ -39,7 +47,9 @@ export async function sendComplaintCreatedEmail(
   description: string
 ) {
   try {
-    await resend.emails.send({
+    console.log(`[Email] Attempting to send creation email to ${toEmail} for complaint #${complaintId}`);
+
+    const response = await resend.emails.send({
       from: fromEmail,
       to: toEmail,
       subject: `Complaint Received #${complaintId}`,
@@ -52,7 +62,13 @@ export async function sendComplaintCreatedEmail(
         <p>You can track the status on your dashboard.</p>
       `,
     });
+
+    console.log(`[Email] Resend API response:`, JSON.stringify(response));
+
+    if (response.error) {
+      console.error("[Email] Resend returned an error:", response.error);
+    }
   } catch (error) {
-    console.error("Failed to send creation email:", error);
+    console.error("[Email] Failed to send creation email (Exception):", error);
   }
 }
